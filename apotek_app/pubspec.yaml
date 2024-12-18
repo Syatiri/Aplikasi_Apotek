@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.19.0  
+  intl: ^0.20.1  
   pdf: ^3.6.0
   path_provider: ^2.0.11
   cupertino_icons: ^1.0.8
@@ -19,7 +19,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true  # Ini berada di bawah flutter

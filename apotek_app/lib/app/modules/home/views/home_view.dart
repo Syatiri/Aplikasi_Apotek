@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:apotek_app/app/routes/app_routes.dart';
-import 'package:apotek_app/app/modules/home/controllers/master_data_controller.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -10,91 +9,69 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Apotek'),
+        title: const Text('Apotek Dashboard'),
+        centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: GridView.count(
-        padding: const EdgeInsets.all(16),
-        crossAxisCount: 2,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        children: [
-          _buildMenuCard(
-            icon: Icons.dashboard,
-            title: 'Dashboard',
-            color: Colors.blue,
-            onTap: () => Get.toNamed(AppRoutes.dashboard),
-          ),
-          _buildMenuCard(
-            icon: Icons.add,
-            title: 'Add Obat',
-            color: Colors.red,
-            onTap: () => Get.toNamed(AppRoutes.addObat),
-          ),
-          _buildMenuCard(
-            icon: Icons.update,
-            title: 'Update Obat',
-            color: Colors.green,
-            onTap: () => _showObatSelectionDialog(context),
-          ),
-          _buildMenuCard(
-            icon: Icons.shopping_cart,
-            title: 'Transaksi',
-            color: Colors.orange,
-            onTap: () => Get.toNamed(AppRoutes.transaksi),
-          ),
-          _buildMenuCard(
-            icon: Icons.logout,
-            title: 'Logout',
-            color: Colors.grey,
-            onTap: () => Get.offAllNamed(AppRoutes.login),
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          children: [
+            _buildMenuCard(
+              icon: Icons.list_alt,
+              title: 'Master Data',
+              color: Colors.blue,
+              onTap: () => Get.toNamed(
+                  AppRoutes.dashboard), // Pastikan rute ini tersedia
+            ),
+            _buildMenuCard(
+              icon: Icons.shopping_cart,
+              title: 'Transaksi',
+              color: Colors.green,
+              onTap: () => Get.toNamed(AppRoutes.transaksi),
+            ),
+            _buildMenuCard(
+              icon: Icons.receipt,
+              title: 'Laporan',
+              color: Colors.orange,
+              onTap: () =>
+                  Get.toNamed(AppRoutes.laporan), // Tambahkan rute laporan
+            ),
+            _buildMenuCard(
+              icon: Icons.logout,
+              title: 'Logout',
+              color: Colors.red,
+              onTap: () => _showLogoutConfirmation(context),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Fungsi untuk menampilkan dialog pemilihan obat
-  void _showObatSelectionDialog(BuildContext context) {
-    final controller = Get.find<MasterDataController>();
-
-    if (controller.obatStock.isEmpty) {
-      Get.snackbar(
-        'Data Kosong',
-        'Belum ada data obat untuk diubah',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
+  // Metode untuk menampilkan konfirmasi logout
+  void _showLogoutConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pilih Obat untuk Diubah'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: controller.obatStock.length,
-            itemBuilder: (context, index) {
-              final obat = controller.obatStock[index];
-              return ListTile(
-                title: Text(obat.name),
-                subtitle: Text('Kode: ${obat.code}, Stok: ${obat.stock}'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Get.toNamed(AppRoutes.editObat, arguments: obat);
-                },
-              );
-            },
-          ),
-        ),
+        title: const Text('Konfirmasi Logout'),
+        content: const Text('Apakah Anda yakin ingin keluar dari aplikasi?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Tambahkan logika logout di sini
+              // Misalnya: hapus token, clear session, dll.
+              Get.offAllNamed(AppRoutes.login);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Logout', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -109,19 +86,22 @@ class HomeView extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: InkWell(
+        borderRadius: BorderRadius.circular(15),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              size: 48,
+              size: 50,
               color: color,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               title,
               style: TextStyle(

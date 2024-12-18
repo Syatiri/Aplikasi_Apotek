@@ -1,4 +1,5 @@
-import 'package:apotek_app/app/modules/home/controllers/master_data_controller.dart';
+import 'package:apotek_app/app/modules/home/controllers/master_data_controller.dart'
+    as controllers;
 import 'package:apotek_app/app/modules/home/views/register_view.dart';
 import 'package:apotek_app/app/modules/home/views/transaksi_view.dart';
 import 'package:get/get.dart';
@@ -28,8 +29,8 @@ class AppPages {
       name: AppRoutes.home,
       page: () => const HomeView(),
       binding: BindingsBuilder(() {
-        // Inisialisasi controller di halaman Home
-        Get.lazyPut(() => MasterDataController());
+        // Gunakan alias untuk MasterDataController
+        Get.lazyPut(() => controllers.MasterDataController());
       }),
     ),
     // Halaman utama Master Data (Dashboard)
@@ -50,12 +51,12 @@ class AppPages {
       page: () => const EditObatView(),
       binding: MasterDataBinding(),
     ),
-     GetPage(
+    GetPage(
       name: AppRoutes.transaksi,
       page: () => TransactionForm(),
       binding: MasterDataBinding(),
     ),
-     GetPage(
+    GetPage(
       name: AppRoutes.register,
       page: () => RegisterView(),
       binding: MasterDataBinding(),

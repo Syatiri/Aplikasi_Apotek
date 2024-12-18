@@ -69,7 +69,7 @@ class MasterDataController extends GetxController {
         password: 'kasir123',
         role: 'Kasir',
       ),
-    ]);  
+    ]);
   }
 
   void addObat(Obat obat) {
@@ -91,35 +91,68 @@ class MasterDataController extends GetxController {
   }
 
   void addSale(Sale sale) {
-  try {
-    // Validasi keberadaan obat
-    final obat = obatStock.firstWhere(
-      (med) => med.name == sale.obatName,
-      orElse: () => throw Exception('Obat tidak ditemukan'),
-    );
+    try {
+      // Validasi keberadaan obat
+      final obat = obatStock.firstWhere(
+        (med) => med.name == sale.obatName,
+        orElse: () => throw Exception('Obat tidak ditemukan'),
+      );
 
-    // Validasi stok obat
-    if (obat.stock < sale.quantity) {
-      throw Exception('Stok obat tidak mencukupi');
+      // Validasi stok obat
+      if (obat.stock < sale.quantity) {
+        throw Exception('Stok obat tidak mencukupi');
+      }
+
+      // Kurangi stok obat
+      obat.stock -= sale.quantity;
+      obatStock.refresh();
+
+      // Tambahkan transaksi ke daftar
+      salesData.add(sale);
+
+      // Notifikasi berhasil
+      Get.snackbar('Sukses', 'Transaksi berhasil ditambahkan');
+    } catch (e) {
+      // Tangani error
+      Get.snackbar('Error', e.toString());
+      rethrow; // Lempar kembali untuk ditangani lebih lanjut jika diperlukan
     }
-
-    // Kurangi stok obat
-    obat.stock -= sale.quantity;
-    obatStock.refresh();
-
-    // Tambahkan transaksi ke daftar
-    salesData.add(sale);
-
-    // Notifikasi berhasil
-    Get.snackbar('Sukses', 'Transaksi berhasil ditambahkan');
-  } catch (e) {
-    // Tangani error
-    Get.snackbar('Error', e.toString());
-    rethrow; // Lempar kembali untuk ditangani lebih lanjut jika diperlukan
   }
-}
 
-    void updatedObat(String code, Obat updatedObat) {
+  void updateSale(String noFaktur, Sale updatedSale) {
+    try {
+      final index = salesData.indexWhere((sale) => sale.noFaktur == noFaktur);
+
+      if (index != -1) {
+        final obat = obatStock.firstWhere(
+          (med) => med.name == updatedSale.obatName,
+          orElse: () => throw Exception('Obat tidak ditemukan'),
+        );
+
+        final oldSale = salesData[index];
+        final difference = updatedSale.quantity - oldSale.quantity;
+
+        if (obat.stock < difference) {
+          throw Exception('Stok obat tidak mencukupi untuk pembaruan');
+        }
+
+        obat.stock -= difference;
+        obatStock.refresh();
+
+        salesData[index] = updatedSale;
+        salesData.refresh();
+
+        Get.snackbar('Sukses', 'Transaksi berhasil diperbarui');
+      } else {
+        throw Exception('Transaksi dengan no faktur $noFaktur tidak ditemukan');
+      }
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      rethrow;
+    }
+  }
+
+  void updatedObat(String code, Obat updatedObat) {
     final index = obatStock.indexWhere((obat) => obat.code == code);
     if (index != -1) {
       obatStock[index] = updatedObat;
@@ -132,22 +165,38 @@ class MasterDataController extends GetxController {
     update();
   }
 
+  void updateCustomer(String customerId, Customer updatedCustomer) {
+    try {
+      final index =
+          customers.indexWhere((customer) => customer.customerId == customerId);
+      if (index != -1) {
+        customers[index] = updatedCustomer;
+        customers.refresh(); // Memperbarui daftar pelanggan
+        Get.snackbar('Sukses', 'Data pelanggan berhasil diperbarui');
+      } else {
+        throw Exception('Pelanggan dengan ID $customerId tidak ditemukan');
+      }
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    }
+  }
+
   void deleteSale(String noFaktur) {
-  salesData.removeWhere((sale) => sale.noFaktur == noFaktur);
-  update(); // Memperbarui UI
-}
+    salesData.removeWhere((sale) => sale.noFaktur == noFaktur);
+    update(); // Memperbarui UI
+  }
 
-void deleteStock(String code) {
-  obatStock.removeWhere((medicine) => medicine.code == code);
-  update();
-}
+  void deleteStock(String code) {
+    obatStock.removeWhere((medicine) => medicine.code == code);
+    update();
+  }
 
-void deleteCustomer(String customerId) {
-  customers.removeWhere((customer) => customer.customerId == customerId);
-  update();
-}
+  void deleteCustomer(String customerId) {
+    customers.removeWhere((customer) => customer.customerId == customerId);
+    update();
+  }
 
-void addUser(User user) {
+  void addUser(User user) {
     users.add(user);
     update();
   }
@@ -168,6 +217,4 @@ void addUser(User user) {
   User? findUserByUsername(String username) {
     return users.firstWhereOrNull((user) => user.username == username);
   }
-
-
 }
